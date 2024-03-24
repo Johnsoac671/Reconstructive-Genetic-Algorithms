@@ -1,5 +1,5 @@
 from itertools import combinations
-from PIL import Image, ImageFilter
+from PIL import Image, ImageEnhance, ImageFilter
 import random
 import numpy as np
 import time
@@ -29,7 +29,10 @@ class Genome:
         target_array = np.array(target)
         image_array = np.array(self.image)
         
-        total_abs_diff = np.sum(np.abs(image_array - target_array))
+        if target_array.shape == 2:
+            total_abs_diff = np.sum(np.abs(image_array - target_array[:, :, None]))
+        else:
+            total_abs_diff = np.sum(np.abs(image_array - target_array))
         
         
         max_diff = 255 * 3 * image_array.size
@@ -41,40 +44,36 @@ class Genome:
         self.image.save(f"images/genome-{id}.png")
     
     def close(self):
-        self.image.close()
+        self.image.close()        
         
-        
-
 def crossover(parent1: Genome, parent2: Genome, crossover_chance=0.5):
+    image1 = np.array(parent1.image)
     image2 = np.array(parent2.image)
     
-    offspring = np.array(parent1.image)
-    height, width, _ = offspring.shape
+    mask = np.random.rand(*image1.shape[:2]) <= crossover_chance
+    offspring = np.where(mask[:, :, np.newaxis], image1, image2)
     
-    for row in range(height):
-        for col in range(width):
-            if random.random() > crossover_chance:
-                offspring[row][col] = image2[row][col]
-                
-    return Image.fromarray(offspring, mode="RGB")
+    return Image.fromarray(offspring.astype(np.uint8), mode="RGB")
 
 
-def mutate(genome: Genome, sigma):
-
-    image = np.array(genome.image).astype(np.float32)
-        
-    noise = np.random.normal(0, sigma, size=image.shape)
+def mutate(genome: Genome, mutation_rate):
+    image_array = np.array(genome.image)
     
-    image += noise
-    image = np.clip(image, 0, 255)
-    genome.image = Image.fromarray(image.astype(np.uint8), mode="RGB")
+    mask = np.random.rand(*image_array.shape[:2]) < mutation_rate
+    
+    new_colors = np.random.randint(0, 256, size=(np.sum(mask), 3))
+    
+    image_array[mask] = new_colors
+    
+    mutated_image = Image.fromarray(image_array)
+    genome.image = mutated_image
     
     return genome
 
 
 def selection_process(genomes, k):
-    selected = genomes[:len(genomes) // 4]
-    genomes = genomes[(len(genomes) // 4):]
+    selected = genomes[:len(genomes) // 5]
+    genomes = genomes[(len(genomes) // 5):]
 
     random.shuffle(genomes)
     
@@ -102,18 +101,14 @@ def display_statistics(genome, generation):
     
     genome.save(generation)
     
-
-
-
-    
-def reconstruct_image(target="target.png", **kwargs):
+def reconstruct_image(target="target.jpg", **kwargs):
     global TIME
     
     target_image = Image.open(target)
-    generations = kwargs.get("generations", 1000)
+    generations = kwargs.get("generations", 20000)
     generation_size = kwargs.get("generation_size", 100)
-    update_stats = kwargs.get("update_stats", generations // 10)
-    sigma = kwargs.get("sigma", 3)
+    mutation_rate = 0.1
+    update_stats = kwargs.get("update_stats", generations // 100)
     tournament_size = kwargs.get("tournament_size", 3)
     
     genomes = [Genome(target_image.size) for _ in range(generation_size)]
@@ -125,7 +120,8 @@ def reconstruct_image(target="target.png", **kwargs):
 
 
     for generation in range(1, generations+1):
-
+        
+        
         for genome in genomes:
             genome.calculate_fitness(target_image)
         
@@ -143,7 +139,7 @@ def reconstruct_image(target="target.png", **kwargs):
 
         for couple in parents:
             offspring = Genome(target_image.size, crossover(*couple))
-            mutate(offspring, sigma)
+            mutate(offspring, mutation_rate)
             genomes.append(offspring)
             
             
