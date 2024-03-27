@@ -6,21 +6,56 @@ from jellyfish import hamming_distance
 CHARACTERS = string.ascii_lowercase + string.ascii_uppercase + string.punctuation + string.digits + " "
 
 def generate_random_pop(pop_size, target_length):
+    """Creates a list pop_size long of target_length length random strings
+
+    Args:
+        pop_size (int): number of random strings to be created
+        target_length (int): length of random strings
+
+    Returns:
+        population [String]: a list of random strings
+    """
     population = [''.join(random.choices(CHARACTERS, k=target_length)) for _ in range(pop_size)]
     
     return population
 
 
 def calculate_pop_fitnesses(population, target):
+    """Finds the fitness value of each string, and returns a packaged (fitness, string) list
+
+    Args:
+        population ([String]): List of candidate strings
+        target (String): string to be reconstructed
+
+    Returns:
+        pop_with_fitness: a list of (fitness, string) tuples, sorted descending by fitness
+    """
     pop_with_fitness = [(calculate_fitness(x, target), x) for x in population]
     return sorted(pop_with_fitness, key=lambda x: x[0], reverse=True)
 
 
 def calculate_fitness(string, target):
+    """determines the similarity between string and target using Hamming distance
+
+    Args:
+        string (String): candidate String
+        target (String): correct String
+
+    Returns:
+        fitness (float): how similar the two given strings are between [0, 1]
+    """
     return round(1 - (hamming_distance(string, target) / len(target)), 2)
 
 
 def display_statistics(generation, generations, best_candidate, start_time):
+    """Prints current generation statistics
+
+    Args:
+        generation (int): current generation
+        generations (int): max number of generations
+        best_candidate (String): closest String to target in current generation
+        start_time (float): time current generation began
+    """
     print(f"Generation: {generation}/{generations}")
     print(f"Completed in: {round(time.time() - start_time, 3)}")
     print(f"Best String: {best_candidate[1]}")
@@ -29,6 +64,14 @@ def display_statistics(generation, generations, best_candidate, start_time):
 
 
 def normalize_fitness(population):
+    """modifies (fitness, String) list to have normalized fitness values
+
+    Args:
+        population [(float, String)]: current population of candidate strings and their fitness values
+
+    Returns:
+        population [(float, String)]: current population of candidate strings and their fitness values, normalized
+    """
     total_fitness = sum(individual[0] for individual in population)
     
     for individual in population:
@@ -38,6 +81,15 @@ def normalize_fitness(population):
 
 
 def selection(population, num_parents):
+    """Selects surviving population based of SUS (Stochastic Universal Sampling)
+
+    Args:
+        population [(float, String)]: current population of candidate strings and their fitness values, normalized
+        num_parents (int): size of surviving population
+
+    Returns:
+        population [String]: surviving population of candidate strings
+    """
     population = normalize_fitness(population)
     num_individuals = len(population)
 
@@ -60,6 +112,15 @@ def selection(population, num_parents):
 
 
 def get_parents(pop, num_pairs_needed):
+    """creates list of mating pairs
+
+    Args:
+        pop [String]: surviving population
+        num_pairs_needed (int): how many pairs needed to rebuild population
+
+    Returns:
+        parents [(String, String)]: list of (String, String) tuples, representing mating pairs
+    """
     n = len(pop)
     pairs = [(random.randint(0, n-1), random.randint(0, n-1)) for _ in range(num_pairs_needed)]
     
@@ -67,6 +128,17 @@ def get_parents(pop, num_pairs_needed):
 
 
 def create_new_generation(population, pop_size, elite_ratio, mutation_rate):
+    """Creates the next generation from previous generations survivors
+
+    Args:
+        population ([String]): surviving population
+        pop_size (int): size of next generation
+        elite_ratio (float): what percentage of survivors are carried over to the next generation
+        mutation_rate (float): what percentage of offsprings characters to be mutated
+
+    Returns:
+        population ([String]): the next generation for testing
+    """
     num_elites = int(len(population) * elite_ratio)
     next_gen = population[:num_elites]
     
@@ -82,6 +154,15 @@ def create_new_generation(population, pop_size, elite_ratio, mutation_rate):
 
 
 def crossover(parent1, parent2):
+    """Given two parent strings, returns a string created from a section of each parent string
+
+    Args:
+        parent1 (String): a surviving string from the last generation
+        parent2 (String): a surviving string from the last generation
+
+    Returns:
+        child: a string stitched together from parts of the parent strings
+    """
     random_point = random.randint(1, len(parent1) - 1)
     
     if random.random() > 0.5:
@@ -92,6 +173,15 @@ def crossover(parent1, parent2):
 
 
 def mutate(string, mutation_rate):
+    """randomly modifies characters in the offspring based of given rate
+
+    Args:
+        string (String): offspring string
+        mutation_rate (float): what percentage of characters to be changed
+
+    Returns:
+        mutated_string: offspring string with mutated characters
+    """
     
     new_string = ""
     
