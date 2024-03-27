@@ -62,10 +62,8 @@ def get_parents(population, num_parents):
     n = len(population)
     num_pairs_needed = num_parents // 2
     
-    # Sample random indices for parent pairs
     random_indices = np.random.choice(n, size=(num_pairs_needed, 2), replace=True)
     
-    # Extract parent pairs from population using the sampled indices
     parents = [(population[i], population[j]) for i, j in random_indices]
     
     return parents
@@ -84,18 +82,14 @@ def crossover(parents):
 
 def mutate(offspring, mutation_rate):
     
-    mutated_offspring = offspring.copy()  # Create a copy of the original array to apply mutations
+    mutated_offspring = offspring.copy()
     
-    # Generate a mask with True values with probability mutation_rate
     mask = np.random.random(size=offspring.shape) < mutation_rate
     
-    # Generate random values for mutation within the range (-50, 50)
-    mutation_values = np.random.randint(-50, 51, size=offspring.shape)
+    mutation_values = np.random.randint(-255, 255, size=offspring.shape)
     
-    # Apply mutation only where the mask is True
     mutated_offspring += mutation_values * mask
     
-    # Clip the values to ensure they remain within the valid range (0 to 255)
     np.clip(mutated_offspring, 0, 255, out=mutated_offspring)
     
     return mutated_offspring
@@ -109,9 +103,9 @@ def print_details(fitness, genome, generation, generations, dimensions):
     print(f"Best Fitness: {fitness}")
     print(f"Time taken: {round(time.time() - TIME,2)}")
     if generation % 5000 == 0:
-        gene_to_img(genome, dimensions).save(f"images/generation-{generation}.png")
+        gene_to_img(genome, dimensions).save(f"image-reproduction/images/generation-{generation}.png")
 
-def reconstruct_image(target="elon-lol2.jpg"):
+def reconstruct_image(target="image-reproduction/target.jpg"):
     global TIME
     global TARGET
     target_image = Image.open(target)
