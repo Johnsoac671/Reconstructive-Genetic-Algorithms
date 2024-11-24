@@ -3,7 +3,7 @@ import string
 import time
 from jellyfish import hamming_distance
 
-CHARACTERS = string.ascii_lowercase + string.ascii_uppercase + string.punctuation + string.digits + " "
+CHARACTERS = string.ascii_lowercase + string.ascii_uppercase + string.punctuation + string.digits + " " 
 
 def generate_random_pop(pop_size, target_length):
     """Creates a list pop_size long of target_length length random strings
@@ -43,6 +43,7 @@ def calculate_fitness(string, target):
 
     Returns:
         fitness (float): how similar the two given strings are between [0, 1]
+         
     """
     return round(1 - (hamming_distance(string, target) / len(target)), 2)
 
@@ -196,6 +197,15 @@ def mutate(string, mutation_rate):
 
 
 def reproduce_string(target, generation_size, generations, elitism_ratio, mutation_rate):
+    """reproduces the given target string
+
+    Args:
+        target (str): The string to be reproduced
+        generation_size (int): number of canidate strings in each generation
+        generations (int): (maximum) number of generations 
+        elitism_ratio (float): percentage of each generation to be carried over
+        mutation_rate (float): chance for any particular character to randomly change during reproduction
+    """
     
     population = generate_random_pop(generation_size, len(target))
     
@@ -209,6 +219,7 @@ def reproduce_string(target, generation_size, generations, elitism_ratio, mutati
         if population[0][0] == 1.0:
             print(f"Target String: {target}")
             print(f"Reconstructed String: {population[0][1]}")
+            print(f"Completed in {generation + 1} generations")
             print()
             break
         
@@ -217,4 +228,6 @@ def reproduce_string(target, generation_size, generations, elitism_ratio, mutati
         population = create_new_generation(population, generation_size, elitism_ratio, mutation_rate)
 
 
-reproduce_string("Now this is a story, all about how, my life got flipped, turned upside down!", 1000, 1000, 0.2, 0.01)
+if __name__ == "__main__":
+    reproduce_string("According to all known laws of aviation, there is no way a bee should be able to fly.",
+                     generation_size=200, generations=1000, elitism_ratio=0.2, mutation_rate=0.01)
