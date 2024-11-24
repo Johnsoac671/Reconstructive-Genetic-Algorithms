@@ -1,10 +1,11 @@
 # Genetic-Algorithms
 Some simple projects using genetic algorithms
 
-# String Reconstruction
+## String Reconstruction
 Takes a target string, and reconstructs it from random characters
 Example execution:
 
+```
 reproduce_string("According to all known laws of aviation, there is no way a bee should be able to fly.", generation_size=200, generations=1000, elitism_ratio=0.2, mutation_rate=0.01)
 
 Generation: 0/1000
@@ -41,9 +42,9 @@ Fitness: 0.99
 Target String: According to all known laws of aviation, there is no way a bee should be able to fly.
 Reconstructed String: According to all known laws of aviation, there is no way a bee should be able to fly.
 Completed in 576 generations
+```
 
-
-# Image Reconstruction
+## Image Reconstruction
 Takes a target image, and reconstructs it from random noise
 
 
