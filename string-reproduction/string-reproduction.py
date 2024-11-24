@@ -213,7 +213,7 @@ def reproduce_string(target, generation_size, generations, elitism_ratio, mutati
         start = time.time()
         population = calculate_pop_fitnesses(population, target)
          
-        if generation % 10 == 0:
+        if generation % 50 == 0:
             display_statistics(generation, generations, population[0], start)
             
         if population[0][0] == 1.0:
