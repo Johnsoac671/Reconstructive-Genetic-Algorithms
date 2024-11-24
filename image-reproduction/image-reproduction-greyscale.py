@@ -43,7 +43,7 @@ def select_survivors(population, num_survivors):
     return population[selected_indices]
 
 def create_new_population(population, pop_size, mutation_rate):
-    elites = population[:(len(population) // 10)]
+    elites = population[:(len(population) // 5)]
     parents = get_parents(population, pop_size - (len(population) // 10))
     offspring = crossover(parents)
     offspring = mutate(offspring, mutation_rate)
@@ -93,7 +93,7 @@ def print_details(fitness, genome, generation, generations, dimensions):
     print(f"Best Fitness: {fitness}")
     print(f"Time taken: {round(time.time() - TIME,2)}")
     TIME = time.time()
-    if generation % 5000 == 0:
+    if generation % 1000 == 0:
         gene_to_img(genome, dimensions).save(f"image-reproduction/images/generation-{generation}.png")
 
 def reconstruct_image(target="image-reproduction/target.jpg"):
@@ -110,7 +110,7 @@ def reconstruct_image(target="image-reproduction/target.jpg"):
     for generation in range(generations):
         best_fitness, population = calculate_fitnesses(population)
         
-        if generation % 1000 == 0:
+        if generation % 10 == 0:
             print_details(best_fitness, population[0], generation, generations, target_image.size)
         
         surviving_population = select_survivors(population, num_survivors)
