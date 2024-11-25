@@ -77,7 +77,9 @@ def select_survivors(population, num_survivors):
     Returns:
         array: a slice of the population who get to reproduce
     """
-    return population[-num_survivors:]
+    fitness_values = np.array([calculate_fitness(gene) for gene in population])
+    selected_indices = np.argsort(fitness_values)[-num_survivors:]
+    return population[selected_indices]
 
 def create_new_population(population, pop_size, mutation_rate):
     """creates the new generation from the survivors
